@@ -2,3 +2,5 @@ data/database.sqlite
 __pycache__/db_utils.cpython-39.pyc
 functions/__pycache__/db_functions.cpython-39.pyc
 functions/__pycache__/display_functions.cpython-39.pyc
+functions/__pycache__/data_format_functions.cpython-39.pyc
+

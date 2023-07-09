@@ -1,6 +1,8 @@
 from IPython.display import Markdown, display
 from typing import Optional
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 
 def sized_markdown(text: str, font_size: int = 14):
@@ -40,3 +42,57 @@ def axis_titles(
     ax.set_ylabel(ytitle)
     ax.set_xlabel(xtitle)
     ax.set_title(title)
+
+
+def get_correlation_pairs(
+    data: pd.DataFrame,
+    positive_cut_off: Optional[float] = 1,
+    negative_cut_off: Optional[float] = -1,
+    leave_center: bool = False,
+) -> pd.DataFrame:
+    """
+    Produces a data frame that contains pairs of features
+    and their r-values based on selected cut-offs
+    """
+    if positive_cut_off is not None and not 0 <= positive_cut_off <= 1:
+        raise ValueError("Positive cut-offs must be between 0 and 1")
+
+    if negative_cut_off is not None and not -1 <= negative_cut_off <= 0:
+        raise ValueError("Negative cut-offs must be between -1 and 0")
+
+    corr_matrix = data.corr(numeric_only=True)
+
+    if not leave_center:
+        np.fill_diagonal(corr_matrix.values, None)
+
+        cut_correlation_matrix = corr_matrix.mask(
+            (corr_matrix >= negative_cut_off) & (corr_matrix <= positive_cut_off)
+        )
+
+    else:
+        # Masking extreme negative values
+        cut_correlation_matrix = corr_matrix.mask(corr_matrix <= negative_cut_off)
+
+        # Masking extreme positive values
+        cut_correlation_matrix = cut_correlation_matrix.mask(
+            corr_matrix >= positive_cut_off
+        )
+
+    # stacking the remaining values
+    cut_correlation_matrix = cut_correlation_matrix.stack().reset_index()
+
+    # combining levels after stacking into a single pair frozenset
+    cut_correlation_matrix["feature_pair"] = cut_correlation_matrix[
+        ["level_0", "level_1"]
+    ].apply(frozenset, axis=1)
+
+    # dropping previous level columns
+    cut_correlation_matrix = cut_correlation_matrix.drop(columns=["level_0", "level_1"])
+
+    # removing duplicate pairs
+    cut_correlation_matrix = cut_correlation_matrix.drop_duplicates(
+        subset="feature_pair"
+    )
+
+    cut_correlation_matrix = cut_correlation_matrix.rename(columns={0: "r-value"})
+    return cut_correlation_matrix

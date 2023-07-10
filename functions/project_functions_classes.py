@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 
 class Team:
@@ -56,3 +57,54 @@ class Team:
         if len(latest_entry) == 0:
             latest_entry = latest_entry.reindex([self.id_code])
         return latest_entry
+
+
+class MatchPlayers:
+    def __init__(self):
+        self.match_data: dict = None
+        self.home_player_ids: dict
+        self.away_player_ids: dict
+        self.away_player_pos: dict[int, tuple]
+        self.home_player_pos: dict[int, tuple]
+
+    def get_data(self, data: pd.DataFrame):
+        self.match_data = data.to_dict()
+
+    def get_player_positions(self):
+        self.home_player_pos = {}
+        self.away_player_pos = {}
+        for i in np.arange(1, 12):
+            self.home_player_pos[i] = (
+                self.match_data["home_player_X" + str(i)],
+                self.match_data["home_player_Y" + str(i)],
+            )
+            self.away_player_pos[i] = (
+                self.match_data["away_player_X" + str(i)],
+                self.match_data["away_player_Y" + str(i)],
+            )
+
+    def get_player_ids(self):
+        self.home_player_ids = {}
+        self.away_player_ids = {}
+
+        home_players = ["home_player_" + str(i) for i in np.arange(1, 12)]
+        goaly_home = "home_player_" + str(
+            next(key for key, val in self.home_player_pos.items() if val == (1, 1))
+        )
+        home_players.remove(goaly_home)
+
+        away_players = ["away_player_" + str(i) for i in np.arange(1, 12)]
+        goaly_away = "away_player_" + str(
+            next(key for key, val in self.away_player_pos.items() if val == (1, 1))
+        )
+        away_players.remove(goaly_away)
+
+        self.home_player_ids["players"] = [
+            self.match_data[player] for player in home_players
+        ]
+        self.home_player_ids["goaly"] = self.match_data[goaly_home]
+
+        self.away_player_ids["players"] = [
+            self.match_data[player] for player in away_players
+        ]
+        self.away_player_ids["goaly"] = self.match_data[goaly_away]

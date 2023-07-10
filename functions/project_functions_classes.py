@@ -62,13 +62,19 @@ class Team:
 class MatchPlayers:
     def __init__(self):
         self.match_data: dict = None
-        self.home_player_ids: dict
-        self.away_player_ids: dict
+        self.home_players: dict
+        self.away_players: dict
         self.away_player_pos: dict[int, tuple]
         self.home_player_pos: dict[int, tuple]
 
+    class Player:
+        def __init__(self,player_id)
+            self.player_id:str = player_id
+
     def get_data(self, data: pd.DataFrame):
         self.match_data = data.to_dict()
+
+
 
     def get_player_positions(self):
         self.home_player_pos = {}
@@ -84,27 +90,36 @@ class MatchPlayers:
             )
 
     def get_player_ids(self):
-        self.home_player_ids = {}
-        self.away_player_ids = {}
 
-        home_players = ["home_player_" + str(i) for i in np.arange(1, 12)]
-        goaly_home = "home_player_" + str(
+
+        # initiate empty dictionaries
+        self.home_players = {}
+        self.away_players = {}
+
+        # Get home player column names and goalkeeper column names
+        home_players_num = ["home_player_" + str(i) for i in np.arange(1, 12)]
+        goaly_home_num = "home_player_" + str(
             next(key for key, val in self.home_player_pos.items() if val == (1, 1))
         )
-        home_players.remove(goaly_home)
+        home_players_num.remove(goaly_home_num)
 
-        away_players = ["away_player_" + str(i) for i in np.arange(1, 12)]
-        goaly_away = "away_player_" + str(
+        # Get away player column names and goalkeeper column names
+        away_players_num = ["away_player_" + str(i) for i in np.arange(1, 12)]
+        goaly_away_num = "away_player_" + str(
             next(key for key, val in self.away_player_pos.items() if val == (1, 1))
         )
-        away_players.remove(goaly_away)
+        away_players_num.remove(goaly_away_num)
 
-        self.home_player_ids["players"] = [
-            self.match_data[player] for player in home_players
+        # Initiate a Player class with it's id for every home player and goalkeeper separately
+        self.home_players["players"] = [
+            self.Player(self.match_data[player]) for player in home_players_num
         ]
-        self.home_player_ids["goaly"] = self.match_data[goaly_home]
+        self.home_players["goaly"] = self.Player(self.match_data[goaly_home_num])
 
-        self.away_player_ids["players"] = [
-            self.match_data[player] for player in away_players
+        # Initiate a Player class with it's id for every away player and goalkeeper separately
+        self.away_players["players"] = [
+            self.Player(self.match_data[player]) for player in away_players_num
         ]
-        self.away_player_ids["goaly"] = self.match_data[goaly_away]
+        self.away_players["goaly"] = self.Player(self.match_data[goaly_away_num])
+
+    # def get_player_attributes(self,date):

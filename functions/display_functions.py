@@ -46,8 +46,8 @@ def axis_titles(
 
 def get_correlation_pairs(
     data: pd.DataFrame,
-    positive_cut_off: Optional[float] = 1,
-    negative_cut_off: Optional[float] = -1,
+    positive_cut_off: Optional[float] = 0,
+    negative_cut_off: Optional[float] = 0,
     leave_center: bool = False,
 ) -> pd.DataFrame:
     """

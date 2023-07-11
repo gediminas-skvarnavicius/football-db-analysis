@@ -68,13 +68,26 @@ class MatchPlayers:
         self.home_player_pos: dict[int, tuple]
 
     class Player:
-        def __init__(self,player_id)
-            self.player_id:str = player_id
+        def __init__(self, player_id):
+            self.player_id: str = player_id
+            self.attributes: dict
+
+        def get_player_attributes(
+            self, player_data: pd.DataFrame, date, player_id_name: str = "player_api_id"
+        ):
+            entries = player_data.loc[player_data[player_id_name] == self.player_id]
+            entries_before_date = entries.loc[entries["date"] < date]
+            latest_entry = (
+                entries_before_date[
+                    entries_before_date["date"] == entries_before_date["date"].max()
+                ]
+                .squeeze()
+                .to_dict()
+            )
+            self.attributes = latest_entry
 
     def get_data(self, data: pd.DataFrame):
         self.match_data = data.to_dict()
-
-
 
     def get_player_positions(self):
         self.home_player_pos = {}
@@ -90,8 +103,6 @@ class MatchPlayers:
             )
 
     def get_player_ids(self):
-
-
         # initiate empty dictionaries
         self.home_players = {}
         self.away_players = {}

@@ -133,4 +133,60 @@ class MatchPlayers:
         ]
         self.away_players["goaly"] = self.Player(self.match_data[goaly_away_num])
 
-    # def get_player_attributes(self,date):
+    def calculate_attribute_difference(self, attribute):
+        try:
+            home_avg = sum(
+                player.attributes[attribute] for player in self.home_players["players"]
+            )
+            away_avg = sum(
+                player.attributes[attribute] for player in self.away_players["players"]
+            )
+            difference = home_avg - away_avg
+            return difference
+        except Exception:
+            return np.nan
+
+    def export_player_attributes(self, cols, how: str = "all"):
+        atts = {}
+
+        if how == "all":
+            # Add home player attributes
+            for i, player in enumerate(self.home_players["players"]):
+                for col in cols:
+                    atts[col + "_H_" + str(i + 1)] = player.attributes[col]
+            for col in cols:
+                atts[col + "_H_gk"] = self.home_players["goaly"].attributes[col]
+
+            # Add away player attributes
+            for i, player in enumerate(self.away_players["players"]):
+                for col in cols:
+                    atts[col + "_A_" + str(i + 1)] = player.attributes[col]
+            for col in cols:
+                atts[col + "_A_gk"] = self.away_players["goaly"].attributes[col]
+
+        if how == "diff":
+            # Add home player attributes
+            for i, (player_h, player_a) in enumerate(
+                zip(self.home_players["players"], self.away_players["players"])
+            ):
+                for col in cols:
+                    try:
+                        val = player_h.attributes[col] - player_a.attributes[col]
+                    except:
+                        val = np.nan
+                    atts[col + "_dif_" + str(i + 1)] = val
+            for col in cols:
+                try:
+                    val = (
+                        self.home_players["goaly"].attributes[col]
+                        - self.away_players["goaly"].attributes[col]
+                    )
+                except:
+                    val = np.nan
+                atts[col + "_dif_gk"] = val
+
+        if how == "avg_diff":
+            for col in cols:
+                atts[col + "_avg_diff"] = self.calculate_attribute_difference(col)
+
+        return atts

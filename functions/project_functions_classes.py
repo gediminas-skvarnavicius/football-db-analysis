@@ -187,6 +187,6 @@ class MatchPlayers:
 
         if how == "avg_diff":
             for col in cols:
-                atts[col + "_avg_diff"] = self.calculate_attribute_difference(col)
+                atts[col + "_avg_diff"] = self.calculate_attribute_difference(col) / 10
 
         return atts

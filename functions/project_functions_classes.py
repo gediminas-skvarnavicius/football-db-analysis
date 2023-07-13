@@ -188,5 +188,13 @@ class MatchPlayers:
         if how == "avg_diff":
             for col in cols:
                 atts[col + "_avg_diff"] = self.calculate_attribute_difference(col) / 10
+                try:
+                    val = (
+                        self.home_players["goaly"].attributes[col]
+                        - self.away_players["goaly"].attributes[col]
+                    )
+                except:
+                    val = np.nan
+                atts[col + "_avg_diff_gk"] = val
 
         return atts

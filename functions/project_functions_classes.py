@@ -198,3 +198,48 @@ class MatchPlayers:
                 atts[col + "_avg_diff_gk"] = val
 
         return atts
+
+
+def outcome_guess_prob_diff(row, coef_a, coef_b):
+    dif = row["win"] - row["loss"]
+    if dif > coef_a:
+        output = "Home Win"
+    elif dif < -coef_b:
+        output = "Home Loss"
+    else:
+        output = "Tie"
+    return output
+
+
+def classifier_train_prob_dif(params, prob_data, y_data):
+    coef_a = params["coef_a"]
+    coef_b = params["coef_b"]
+    guess = prob_data.apply(outcome_guess_prob_diff, axis=1, args=(coef_a, coef_b))
+    sum_false = ~(guess.values == y_data.values)
+    return sum_false.astype(int)
+
+
+def outcome_guess_prob_win(x: float, coef_win, coef_loss):
+    """
+    Assigns a match outcome value based on the probability of home team
+    win by using two threshold coefficients.
+    """
+    if x >= 1 - coef_win:
+        y = "Home Win"
+    elif x <= coef_loss:
+        y = "Home Loss"
+    else:
+        y = "Tie"
+    return y
+
+
+def classifier_train_prob_win(params, probs, y_data):
+    """
+    Calculates the match outcome based home win probabilities
+    and given threshold coefficients.
+    """
+    coef_win = params["coef_win"]
+    coef_loss = params["coef_loss"]
+    guess = probs.apply(outcome_guess_prob_win, args=(coef_win, coef_loss))
+    sum_false = ~(guess.values == y_data.values)
+    return sum_false.astype(int)

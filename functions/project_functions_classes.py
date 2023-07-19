@@ -197,10 +197,34 @@ class MatchPlayers:
                     val = np.nan
                 atts[col + "_avg_diff_gk"] = val
 
+        if how == "avg":
+            # Add home player attributes
+            for col in cols:
+                att = 0
+                for player in self.home_players["players"]:
+                    try:
+                        att += player.attributes[col]
+                    except:
+                        att = np.nan
+                atts[col + "_H_avg"] = att / 10
+            for col in cols:
+                atts[col + "_H_gk"] = self.home_players["goaly"].attributes[col]
+
+            # Add away player attributes
+            for col in cols:
+                att = 0
+                for player in self.away_players["players"]:
+                    try:
+                        att += player.attributes[col]
+                    except:
+                        att = np.nan
+                atts[col + "_A_avg"] = att / 10
+            for col in cols:
+                atts[col + "_A_gk"] = self.away_players["goaly"].attributes[col]
         return atts
 
 
-def outcome_guess_prob_diff(row, coef_a, coef_b):
+def outcome_guess_prob_dif(row, coef_a, coef_b):
     dif = row["win"] - row["loss"]
     if dif > coef_a:
         output = "Home Win"
@@ -214,7 +238,7 @@ def outcome_guess_prob_diff(row, coef_a, coef_b):
 def classifier_train_prob_dif(params, prob_data, y_data):
     coef_a = params["coef_a"]
     coef_b = params["coef_b"]
-    guess = prob_data.apply(outcome_guess_prob_diff, axis=1, args=(coef_a, coef_b))
+    guess = prob_data.apply(outcome_guess_prob_dif, axis=1, args=(coef_a, coef_b))
     sum_false = ~(guess.values == y_data.values)
     return sum_false.astype(int)
 

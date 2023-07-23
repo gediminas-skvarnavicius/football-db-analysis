@@ -96,3 +96,21 @@ def get_correlation_pairs(
 
     cut_correlation_matrix = cut_correlation_matrix.rename(columns={0: "r-value"})
     return cut_correlation_matrix
+
+
+def rb_cell_highlight(value: float, threshold: float, higher: bool = True) -> str:
+    """Sets the cell background color of a pandas DataFrame,
+    based on whether the cell's float value is greater than the threshold.
+    """
+    color = ""
+    if higher:
+        if value > threshold:
+            color = "background-color: rgba(0, 0, 255, 0.25)"
+        else:
+            color = "background-color: rgba(255, 0, 0, 0.25)"
+    else:
+        if value < threshold:
+            color = "background-color: rgba(0, 0, 255, 0.25)"
+        else:
+            color = "background-color: rgba(255, 0, 0, 0.25)"
+    return color

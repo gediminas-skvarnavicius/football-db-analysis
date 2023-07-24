@@ -267,3 +267,75 @@ def classifier_train_prob_win(params, probs, y_data):
     guess = probs.apply(outcome_guess_prob_win, args=(coef_win, coef_loss))
     sum_false = ~(guess.values == y_data.values)
     return sum_false.astype(int)
+
+
+from typing import Dict, Any
+
+
+def bet_home(row: Dict[str, Any]) -> float:
+    """
+    Calculate the profit for a bet on a home win.
+
+    Parameters:
+        row (dict): A dictionary representing the row of data with the following keys:
+                    - 'home_win_pred' (int): 1 if the prediction is a home win, 0 otherwise.
+                    - 'outcome' (str): The actual outcome of the match ('Home Win', 'Home Loss', or 'Tie').
+                    - 'home_win_coef' (float): The coefficient (odds) for a home win.
+
+    Returns:
+        float: The profit (or loss if negative) from the bet on a home win.
+    """
+
+    profit = 0
+    if row["home_win_pred"] == 1:
+        if row["outcome"] == "Home Win":
+            profit = row["home_win_coef"] * 100
+        else:
+            profit = -100
+    return profit
+
+
+def bet_away(row: Dict[str, Any]) -> float:
+    """
+    Calculate the profit for a bet on an away win.
+
+    Parameters:
+        row (dict): A dictionary representing the row of data with the following keys:
+                    - 'away_win_pred' (int): 1 if the prediction is an away win, 0 otherwise.
+                    - 'outcome' (str): The actual outcome of the match ('Home Win', 'Home Loss', or 'Tie').
+                    - 'away_win_coef' (float): The coefficient (odds) for an away win.
+
+    Returns:
+        float: The profit (or loss if negative) from the bet on an away win.
+    """
+
+    profit = 0
+    if row["away_win_pred"] == 1:
+        if row["outcome"] == "Home Loss":
+            profit = row["away_win_coef"] * 100
+        else:
+            profit = -100
+    return profit
+
+
+def bet_tie(row: Dict[str, Any]) -> float:
+    """
+    Calculate the profit for a bet on a tie.
+
+    Parameters:
+        row (dict): A dictionary representing the row of data with the following keys:
+                    - 'tie_pred' (str): 'Tie' if the prediction is a tie, otherwise another value.
+                    - 'outcome' (str): The actual outcome of the match ('Home Win', 'Home Loss', or 'Tie').
+                    - 'tie_coef' (float): The coefficient (odds) for a tie.
+
+    Returns:
+        float: The profit (or loss if negative) from the bet on a tie.
+    """
+
+    profit = 0
+    if row["tie_pred"] == "Tie":
+        if row["outcome"] == "Tie":
+            profit = row["tie_coef"] * 100
+        else:
+            profit = -100
+    return profit

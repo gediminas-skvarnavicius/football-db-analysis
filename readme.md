@@ -1,4 +1,4 @@
-# Module 4 Capstone analysis of the Footbal dataset
+# Module 4 Capstone analysis of the Football dataset
 
 Analysis of the Footbal [dataset](https://www.kaggle.com/datasets/prajitdatta/ultimate-25k-matches-football-database-european)
 

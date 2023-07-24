@@ -5,7 +5,22 @@ import pandas as pd
 import numpy as np
 
 
-def sized_markdown(text: str, font_size: int = 14):
+def sized_markdown(text: str, font_size: int = 14) -> None:
+    """
+    Converts the given 'text' into a formatted Markdown representation and displays it with the specified 'font_size'.
+
+    Parameters:
+        text (str): The text content to be converted to Markdown and displayed.
+        font_size (int, optional): The font size (in pixels) to be applied to the displayed Markdown.
+                                   Default is 14 pixels if not specified.
+
+    Returns:
+        None: This function does not return any value. It directly displays the formatted Markdown output.
+
+    Example:
+        sized_markdown("Hello, **ChatGPT**!", font_size=20)
+        # This will display the text "Hello, with a font size of 20 pixels in a Markdown-styled format.
+    """
     display(Markdown(f"<span style='font-size:{font_size}px;'>" + text))
 
 
@@ -14,7 +29,7 @@ def axis_titles(
     xtitle: Optional[str] = None,
     ytitle: Optional[str] = None,
     title: Optional[str] = None,
-):
+) -> None:
     """
     Sets the labels of the x and y axes, as well as the title of a graph.
 
@@ -99,8 +114,28 @@ def get_correlation_pairs(
 
 
 def rb_cell_highlight(value: float, threshold: float, higher: bool = True) -> str:
-    """Sets the cell background color of a pandas DataFrame,
-    based on whether the cell's float value is greater than the threshold.
+    """
+    Sets the background color for a cell in a pandas DataFrame based on whether the cell's float value is higher
+    or lower than the specified threshold.
+
+    Parameters:
+        value (float): The float value of the cell to be compared with the threshold.
+        threshold (float): The threshold value used for comparison.
+        higher (bool, optional): A flag indicating whether to highlight cells with values higher than the threshold.
+                                 If True (default), cells with higher values will be highlighted in blue,
+                                 otherwise, cells with lower values will be highlighted in blue.
+
+    Returns:
+        str: A CSS-style string specifying the background color for the cell based on the comparison result.
+
+    Example:
+        rb_cell_highlight(8.5, 7.0, higher=True)
+        # Returns: "background-color: rgba(0, 0, 255, 0.25)"
+        # The cell background color will be set to light blue because 8.5 is higher than 7.0.
+
+        rb_cell_highlight(6.2, 7.0, higher=False)
+        # Returns: "background-color: rgba(0, 0, 255, 0.25)"
+        # The cell background color will be set to light blue because 6.2 is lower than 7.0 (as higher=False).
     """
     color = ""
     if higher:

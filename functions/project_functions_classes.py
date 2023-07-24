@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import numpy as np
+from typing import Tuple, Dict, Any, List
 
 
 class Team:
@@ -60,6 +61,40 @@ class Team:
 
 
 class MatchPlayers:
+    """
+    A class for handling player data and calculating attribute differences in a match.
+
+    Attributes:
+        match_data (dict): A dictionary containing the match data in key-value pairs.
+        home_players (dict): A dictionary containing the home team's players and goalkeeper.
+        away_players (dict): A dictionary containing the away team's players and goalkeeper.
+        away_player_pos (dict[int, tuple]): A dictionary mapping player positions (1 to 11) to (X, Y) coordinates for the away team.
+        home_player_pos (dict[int, tuple]): A dictionary mapping player positions (1 to 11) to (X, Y) coordinates for the home team.
+
+    Methods:
+        __init__(): Initializes the MatchPlayers class with empty data.
+        get_data(data: pd.DataFrame): Sets the match_data attribute with a given pandas DataFrame.
+        get_player_positions(): Populates the home_player_pos and away_player_pos dictionaries with player positions.
+        get_player_ids(): Populates the home_players and away_players dictionaries with Player instances based on player IDs.
+        calculate_attribute_difference(attribute: str) -> float: Calculates the difference in the specified attribute
+                                                               between home and away teams' players.
+        export_player_attributes(cols: List[str], how: str = "all") -> dict: Exports player attributes as a dictionary
+                                                                            based on the specified method ('all', 'diff',
+                                                                            'avg_diff', 'avg').
+
+    Class Player:
+        A nested class representing a player with their attributes.
+
+        Attributes:
+            player_id (str): The unique identifier of the player.
+            attributes (dict): A dictionary containing the player's attributes.
+
+        Methods:
+            __init__(player_id: str): Initializes the Player class with the player's ID.
+            get_player_attributes(player_data: pd.DataFrame, date, player_id_name: str = "player_api_id"):
+                Retrieves the player's attributes from player_data DataFrame based on the provided date.
+    """
+
     def __init__(self):
         self.match_data: dict = None
         self.home_players: dict
@@ -224,7 +259,18 @@ class MatchPlayers:
         return atts
 
 
-def outcome_guess_prob_dif(row, coef_a, coef_b):
+def outcome_guess_prob_dif(row: pd.Series, coef_a: float, coef_b: float) -> str:
+    """
+    Predicts the match outcome based on the difference between win and loss probabilities.
+
+    Parameters:
+        row (pd.Series): A pandas Series representing a row of data containing 'win' and 'loss' probabilities.
+        coef_a (float): The threshold coefficient for predicting a 'Home Win' outcome.
+        coef_b (float): The threshold coefficient for predicting a 'Home Loss' outcome.
+
+    Returns:
+        str: The predicted match outcome, which can be 'Home Win', 'Home Loss', or 'Tie'.
+    """
     dif = row["win"] - row["loss"]
     if dif > coef_a:
         output = "Home Win"
@@ -235,7 +281,20 @@ def outcome_guess_prob_dif(row, coef_a, coef_b):
     return output
 
 
-def classifier_train_prob_dif(params, prob_data, y_data):
+def classifier_train_prob_dif(
+    params: Dict[str, float], prob_data: pd.DataFrame, y_data: pd.Series
+) -> np.ndarray:
+    """
+    Trains a classifier based on win and loss probabilities using threshold coefficients.
+
+    Parameters:
+        params (dict): A dictionary containing the threshold coefficients 'coef_a' and 'coef_b'.
+        prob_data (pd.DataFrame): A pandas DataFrame containing 'win' and 'loss' probabilities.
+        y_data (pd.Series): A pandas Series representing the actual match outcomes.
+
+    Returns:
+        np.ndarray: An array of integers indicating whether the predictions match the actual outcomes.
+    """
     coef_a = params["coef_a"]
     coef_b = params["coef_b"]
     guess = prob_data.apply(outcome_guess_prob_dif, axis=1, args=(coef_a, coef_b))
@@ -243,10 +302,18 @@ def classifier_train_prob_dif(params, prob_data, y_data):
     return sum_false.astype(int)
 
 
-def outcome_guess_prob_win(x: float, coef_win, coef_loss):
+def outcome_guess_prob_win(x: float, coef_win: float, coef_loss: float) -> str:
     """
-    Assigns a match outcome value based on the probability of home team
-    win by using two threshold coefficients.
+    Assigns a match outcome value based on the probability of home team win
+    using two threshold coefficients.
+
+    Parameters:
+        x (float): The probability of home team win.
+        coef_win (float): The threshold coefficient for predicting a 'Home Win' outcome.
+        coef_loss (float): The threshold coefficient for predicting a 'Home Loss' outcome.
+
+    Returns:
+        str: The predicted match outcome, which can be 'Home Win', 'Home Loss', or 'Tie'.
     """
     if x >= 1 - coef_win:
         y = "Home Win"
@@ -257,19 +324,25 @@ def outcome_guess_prob_win(x: float, coef_win, coef_loss):
     return y
 
 
-def classifier_train_prob_win(params, probs, y_data):
+def classifier_train_prob_win(
+    params: Dict[str, float], probs: pd.Series, y_data: pd.Series
+) -> np.ndarray:
     """
-    Calculates the match outcome based home win probabilities
-    and given threshold coefficients.
+    Trains a classifier based on home win probabilities and threshold coefficients.
+
+    Parameters:
+        params (dict): A dictionary containing the threshold coefficients 'coef_win' and 'coef_loss'.
+        probs (pd.Series): A pandas Series containing home win probabilities.
+        y_data (pd.Series): A pandas Series representing the actual match outcomes.
+
+    Returns:
+        np.ndarray: An array of integers indicating whether the predictions match the actual outcomes.
     """
     coef_win = params["coef_win"]
     coef_loss = params["coef_loss"]
     guess = probs.apply(outcome_guess_prob_win, args=(coef_win, coef_loss))
     sum_false = ~(guess.values == y_data.values)
     return sum_false.astype(int)
-
-
-from typing import Dict, Any
 
 
 def bet_home(row: Dict[str, Any]) -> float:

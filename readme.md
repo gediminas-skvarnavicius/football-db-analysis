@@ -14,8 +14,3 @@ tables.xlsx contains table names and column names of the database for reference.
 
 The Looker Studio Dashboard is embedded in the analysis or can be viewed separately as : https://lookerstudio.google.com/u/0/reporting/7fdf4aab-2c53-454b-8e7e-adc93591e2dd/page/fsdXD
 
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
-
